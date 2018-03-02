@@ -25,5 +25,14 @@
          [val (filter-values ret)])
     val))
 
+(define (last-page-number url)
+  (let* ([res (page-get url)]
+         [li (last ((sxpath '(// li a @ href)) res))])
+    (match (regexp-match #rx"[0-9]+" (last li))
+      [(cons a '()) a]
+      [_ (error "some thing went wrong")])))
+      
+(define url "http://git-awards.com/users?city=san+francisco")         
 (define res (list-of-values "http://git-awards.com/users?utf8=%E2%9C%93&type=city&language=swift&city=Paris"))
 (define h (list-of-values "http://git-awards.com/users"))
+(define t (page-get "http://git-awards.com/users?city=san+francisco"))
