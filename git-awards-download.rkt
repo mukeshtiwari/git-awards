@@ -101,4 +101,19 @@
          [commit-list ((sxpath "//rect[contains(@class, 'day')]") commits)])
     (map count-commit-day commit-list)))
          
-(define count (count-commits-year "https://github.com/mukeshtiwari?tab=overview&from=2011-12-01&to=2011-12-31"))
+;(define countL (count-commits-year "https://github.com/LeifAndersen?tab=overview&from=2011-12-01&to=2011-12-31"))
+;(define countM (count-commits-year "https://github.com/mukeshtiwari?tab=overview&from=2011-12-01&to=2011-12-31"))
+
+
+;; Compare your commit with other user
+(define (compare-commits first-user-url second-user-url)
+  (let* ([fuser-commits (count-commits-year first-user-url)]
+         [suser-commits (count-commits-year second-user-url)])
+    (map list
+         (map (λ(x) (car x)) fuser-commits)
+         (map (λ(x) (cdr x)) fuser-commits)
+         (map (λ(x) (cdr x)) suser-commits))))
+
+(define comp-commit
+  (compare-commits "https://github.com/mukeshtiwari?tab=overview&from=2011-12-01&to=2011-12-31"
+                   "https://github.com/LeifAndersen?tab=overview&from=2011-12-01&to=2011-12-31"))
