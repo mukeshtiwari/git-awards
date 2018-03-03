@@ -49,11 +49,9 @@
 ;(define res (list-of-values "http://git-awards.com/users?utf8=%E2%9C%93&type=city&language=swift&city=Paris"))
 ;(define h (list-of-values "http://git-awards.com/users"))
 ;(define t (page-get "http://git-awards.com/users?city=san+francisco"))
-
 ;; End of git-award page parser
+
 ;; Start of parsing data from github
-
-
 ;; Removing "\n" and "       " 
 (define (remove-empty-and-newline ls)
   (filter (λ(x) (if (string? x) (non-empty-string? (string-trim x)) #t)) ls))
@@ -67,7 +65,6 @@
 
 ;; This function takes user repo url and returns the list of repository
 ;; (github-repo-list "https://github.com/racket?tab=repositories")
-;(span (@ (class "mr-3") (itemprop "programmingLanguage")) "\n" "          Racket\n" "        ")
 (define (github-repo-list user-repo-url)
   (let* ([repo (page-get user-repo-url)]
          [li ((sxpath "//div[contains(@class, 'd-inline-block mb-1')]//h3//a") repo)]
@@ -78,4 +75,30 @@
    
 
 
-(define repo (page-get "https://github.com/racket?tab=repositories"))
+;(define repo (github-repo-list "https://github.com/racket?tab=repositories"))
+;(define own-repo (github-repo-list "https://github.com/mukeshtiwari?tab=repositories"))
+;(define star-repo (github-repo-list "https://github.com/mukeshtiwari?tab=stars"))
+
+;; Fetch the followers and their github id
+(define (follower-list follower-url)
+  (let* ([follower (page-get follower-url)]
+         [flist ((sxpath "//span[contains(@class, 'f4 link-gray-dark')]/text()") follower)]
+         [github-id ((sxpath "//span[contains(@class, 'link-gray pl-1')]/text()") follower)])
+         (map cons flist github-id)))
+
+(define follower (follower-list  "https://github.com/mukeshtiwari?tab=followers"))
+(define following (follower-list "https://github.com/mukeshtiwari?tab=following"))
+
+
+;; Count the commits each day in one year
+(define (count-commit-day ls)
+  (match ls
+    [(cons _ (list* (list* _ _ _ _ _ _ _ (cons (cons _ (cons n _)) (cons (cons _ (cons d _)) _))) _)) (cons d n)]
+    [_ '()]))
+
+(define (count-commits-year year-url)
+  (let* ([commits (page-get year-url)]
+         [commit-list ((sxpath "//rect[contains(@class, 'day')]") commits)])
+    (map count-commit-day commit-list)))
+         
+(define count (count-commits-year "https://github.com/mukeshtiwari?tab=overview&from=2011-12-01&to=2011-12-31"))
