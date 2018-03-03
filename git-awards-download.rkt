@@ -1,7 +1,8 @@
 #lang racket
 (require net/url
          html-parsing
-         sxml/sxpath)
+         sxml/sxpath
+         plot)
 
 ;; It fetches the content of page. It can be used to fetch any page
 ;; (page-get "https://cs.brown.edu/courses/cs173/2012/book/")
