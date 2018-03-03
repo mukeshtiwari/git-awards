@@ -45,10 +45,37 @@
       [(cons a '()) a]
       [_ (error "some thing went wrong")])))
       
-(define url "http://git-awards.com/users?city=san+francisco")         
-(define res (list-of-values "http://git-awards.com/users?utf8=%E2%9C%93&type=city&language=swift&city=Paris"))
-(define h (list-of-values "http://git-awards.com/users"))
-(define t (page-get "http://git-awards.com/users?city=san+francisco"))
+;(define url "http://git-awards.com/users?city=san+francisco")         
+;(define res (list-of-values "http://git-awards.com/users?utf8=%E2%9C%93&type=city&language=swift&city=Paris"))
+;(define h (list-of-values "http://git-awards.com/users"))
+;(define t (page-get "http://git-awards.com/users?city=san+francisco"))
 
 ;; End of git-award page parser
+;; Start of parsing data from github
 
+
+;; Removing "\n" and "       " 
+(define (remove-empty-and-newline ls)
+  (filter (λ(x) (if (string? x) (non-empty-string? (string-trim x)) #t)) ls))
+
+;; if div list contains (span (@ (class "mr-3") (itemprop "programmingLanguage")) "\n" "          Racfrom list ket\n" "        ")
+(define (contains-span-class-mr-3 ls)
+  (match ls
+    [(cons (quasiquote div)
+           (cons _ (cons _ (cons (cons (quasiquote span) rest) _)))) (string-trim (caddr rest))]
+    [_ ""]))
+
+;; This function takes user repo url and returns the list of repository
+;; (github-repo-list "https://github.com/racket?tab=repositories")
+;(span (@ (class "mr-3") (itemprop "programmingLanguage")) "\n" "          Racket\n" "        ")
+(define (github-repo-list user-repo-url)
+  (let* ([repo (page-get user-repo-url)]
+         [li ((sxpath "//div[contains(@class, 'd-inline-block mb-1')]//h3//a") repo)]
+         [lan ((sxpath "//div[contains(@class, 'f6 text-gray mt-2')]") repo)]
+         [repo-list (map (λ(x) (string-trim (last x))) li)]
+         [lang-list (map (λ(x) (contains-span-class-mr-3 (remove-empty-and-newline x))) lan)])
+    (map cons repo-list lang-list)))
+   
+
+
+(define repo (page-get "https://github.com/racket?tab=repositories"))
